@@ -422,6 +422,75 @@
 
   [data-reveal]{opacity:0;transform:translateY(22px);transition:opacity .7s ease, transform .7s ease;}
   [data-reveal].in{opacity:1;transform:translateY(0);}
+.browser-card img,
+.popup-shot img {
+  cursor: zoom-in;
+  transition: filter 0.15s ease;
+}
+.browser-card img:hover,
+.popup-shot img:hover {
+  filter: brightness(0.93);
+}
+.zoom-hint {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.lightbox-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.88);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  cursor: zoom-out;
+}
+.lightbox-overlay.active {
+  display: flex;
+}
+.lightbox-overlay img {
+  max-width: 95vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  cursor: default;
+}
+.lightbox-close {
+  position: fixed;
+  top: 20px;
+  right: 28px;
+  color: #fff;
+  font-size: 32px;
+  line-height: 1;
+  cursor: pointer;
+  background: rgba(255,255,255,0.12);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.lightbox-caption {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #e2e8f0;
+  font-size: 14px;
+  background: rgba(0,0,0,0.4);
+  padding: 6px 14px;
+  border-radius: 20px;
+}
 </style>
 </head>
 <body>
@@ -691,5 +760,55 @@
   stepSections.forEach(s=>spy.observe(s));
 </script>
 
+
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <span class="lightbox-close" id="lightboxClose">&times;</span>
+  <img id="lightboxImg" src="" alt="ภาพขยาย">
+  <div class="lightbox-caption" id="lightboxCaption"></div>
+</div>
+
+<script>
+(function() {
+  var overlay = document.getElementById('lightboxOverlay');
+  var lbImg = document.getElementById('lightboxImg');
+  var lbCaption = document.getElementById('lightboxCaption');
+  var lbClose = document.getElementById('lightboxClose');
+
+  function openLightbox(imgEl) {
+    lbImg.src = imgEl.src;
+    lbCaption.textContent = imgEl.alt || '';
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    overlay.classList.remove('active');
+    lbImg.src = '';
+    document.body.style.overflow = '';
+  }
+
+  var targets = document.querySelectorAll('.browser-card img, .popup-shot img');
+  targets.forEach(function(img) {
+    var wrapper = img.parentElement;
+    if (wrapper && getComputedStyle(wrapper).position === 'static') {
+      wrapper.style.position = 'relative';
+    }
+    var hint = document.createElement('span');
+    hint.className = 'zoom-hint';
+    hint.textContent = 'คลิกเพื่อขยาย';
+    if (wrapper) wrapper.appendChild(hint);
+
+    img.addEventListener('click', function() {
+      openLightbox(img);
+    });
+  });
+
+  overlay.addEventListener('click', closeLightbox);
+  lbClose.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
+  });
+})();
+</script>
 </body>
 </html>
